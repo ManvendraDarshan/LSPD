@@ -13,5 +13,10 @@ api.interceptors.request.use((config) => {
 });
 
 export function errorMessage(error) {
-  return error?.response?.data?.detail || error?.response?.data?.message || "Something went wrong";
+  const message = error?.response?.data?.detail || error?.response?.data?.message;
+  if (!error?.response) return "Cannot reach the API. Make sure the FastAPI server is running.";
+  if (error.response.status >= 500 && /database|postgres|psycopg|password authentication/i.test(message || "")) {
+    return "Database unavailable. Check PostgreSQL is running and DATABASE_URL credentials are correct.";
+  }
+  return message || "Request failed. Please try again.";
 }
