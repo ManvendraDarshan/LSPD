@@ -37,6 +37,8 @@ Choose one setup method:
 
 Git is optional if you already have the project files.
 
+On Windows, if PostgreSQL is installed without PostGIS, open `C:\Program Files\PostgreSQL\16\bin\stackbuilder.exe`, select PostgreSQL 16, choose **Spatial Extensions > PostGIS**, and complete the installer. The LSPD migrations cannot run until PostGIS is installed.
+
 ## Run With Docker (Recommended)
 
 Open PowerShell in the project folder:
@@ -197,6 +199,7 @@ npm run build
 - `docker` is not recognized: install and start Docker Desktop, then reopen PowerShell.
 - The frontend cannot reach the API: confirm `http://localhost:8000/api/health` opens successfully and check `VITE_API_URL`.
 - Provider registration shows a database error: PostgreSQL may be using a different password for the `lspd` user than the value in `.env`. Sign in to PostgreSQL as an administrator and run `ALTER USER lspd WITH PASSWORD 'lspd';`, then confirm `.env` contains `DATABASE_URL=postgresql+psycopg://lspd:lspd@localhost:5432/lspd`. Run `alembic upgrade head` and `python ..\database\seed\seed.py` from `backend`, then refresh the registration page.
+- Migrations fail with `extension "postgis" is not available`: install PostGIS through PostgreSQL StackBuilder, restart PostgreSQL, then run `alembic upgrade head` again.
 - Docker backend exits while seeding: rebuild after pulling the latest files with `docker compose build --no-cache backend`.
 - If migrations fail with PostGIS errors, confirm the database user can run `CREATE EXTENSION postgis`.
 - If maps do not load, check browser network access to OpenStreetMap tile servers.
