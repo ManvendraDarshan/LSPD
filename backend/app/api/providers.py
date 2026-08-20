@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.api.deps import current_user, require_roles
 from app.core.database import get_db
 from app.models.enums import UserRole, VerificationStatus
-from app.models.provider import ProviderService, ServiceProvider
+from app.models.provider import ProviderService, ServiceCategory, ServiceProvider
 from app.models.user import User
 from app.repositories.providers import search_providers
 from app.schemas.common import Message, Page

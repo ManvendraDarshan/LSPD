@@ -19,7 +19,7 @@ export default function ProviderRegistration() {
       if (!user) await register(account);
       await api.post("/providers", { ...profile, category_name: profile.category_name.trim() });
       toast.success("Provider profile submitted for verification");
-      navigate("/provider/dashboard");
+      navigate("/search");
     } catch (error) {
       toast.error(errorMessage(error));
     }
