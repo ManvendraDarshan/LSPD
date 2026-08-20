@@ -5,7 +5,7 @@ import { roleHome } from "../utils/constants";
 
 export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", city: "", district: "", role: "customer" });
-  const { register } = useAuth();
+  const { register, submitting } = useAuth();
   const navigate = useNavigate();
   async function submit(e) {
     e.preventDefault();
@@ -19,7 +19,7 @@ export default function Register() {
         <form onSubmit={submit} className="mt-5 grid gap-4 sm:grid-cols-2">
           {["name", "email", "phone", "city", "district"].map((key) => <label key={key} className="field"><span>{key}</span><input required type={key === "email" ? "email" : "text"} value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} /></label>)}
           <label className="field"><span>Password</span><input required minLength="8" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></label>
-          <button className="btn-primary sm:col-span-2">Create account</button>
+          <button className="btn-primary sm:col-span-2" disabled={submitting}>{submitting ? "Creating account..." : "Create account"}</button>
         </form>
       </div>
     </div>

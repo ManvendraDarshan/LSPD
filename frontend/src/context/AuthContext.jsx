@@ -22,6 +22,7 @@ const storage = {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(Boolean(storage.get("lspd_token")));
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const token = storage.get("lspd_token");
@@ -33,6 +34,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function login(payload) {
+    if (submitting) return;
+    setSubmitting(true);
     try {
       const { data } = await api.post("/auth/login", payload);
       storage.set("lspd_token", data.access_token);
@@ -40,12 +43,16 @@ export function AuthProvider({ children }) {
       toast.success("Welcome back");
       return data.user;
     } catch (error) {
-      toast.error(errorMessage(error));
+      toast.error(errorMessage(error), { id: "auth-error" });
       throw error;
+    } finally {
+      setSubmitting(false);
     }
   }
 
   async function register(payload) {
+    if (submitting) return;
+    setSubmitting(true);
     try {
       const { data } = await api.post("/auth/register", payload);
       storage.set("lspd_token", data.access_token);
@@ -53,8 +60,10 @@ export function AuthProvider({ children }) {
       toast.success("Account created");
       return data.user;
     } catch (error) {
-      toast.error(errorMessage(error));
+      toast.error(errorMessage(error), { id: "auth-error" });
       throw error;
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -64,7 +73,7 @@ export function AuthProvider({ children }) {
     toast.success("Logged out");
   }
 
-  const value = useMemo(() => ({ user, loading, login, register, logout }), [user, loading]);
+  const value = useMemo(() => ({ user, loading, submitting, login, register, logout }), [user, loading, submitting]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
