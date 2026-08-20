@@ -38,7 +38,8 @@ class ProviderCreate(BaseModel):
     latitude: float = Field(ge=-90, le=90)
     longitude: float = Field(ge=-180, le=180)
     working_hours: str = "Mon-Sat, 9:00 AM - 6:00 PM"
-    category_ids: list[int] = Field(min_length=1)
+    category_ids: list[int] | None = Field(default=None, min_length=1)
+    category_name: str | None = Field(default=None, min_length=2, max_length=100)
     profile_image: str | None = None
     cover_image: str | None = None
 

@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+import re
+
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import current_user, require_roles
@@ -72,6 +74,31 @@ def provider_detail(provider_id: int, db: Session = Depends(get_db)):
 def create_provider(payload: ProviderCreate, user: User = Depends(require_roles(UserRole.provider)), db: Session = Depends(get_db)):
     if user.provider_profile:
         raise HTTPException(status_code=409, detail="Provider profile already exists")
+    category_ids = payload.category_ids or []
+    if payload.category_name is not None:
+        category_name = payload.category_name.strip()
+        if len(category_name) < 2:
+            raise HTTPException(status_code=422, detail="A valid service category is required")
+        category = db.scalar(select(ServiceCategory).where(func.lower(ServiceCategory.name) == category_name.lower()))
+        if not category:
+            slug = re.sub(r"[^a-z0-9]+", "-", category_name.lower()).strip("-") or "service"
+            slug_base = slug
+            suffix = 2
+            while db.scalar(select(ServiceCategory.id).where(ServiceCategory.slug == slug)):
+                slug = f"{slug_base}-{suffix}"
+                suffix += 1
+            category = ServiceCategory(
+                name=category_name,
+                slug=slug,
+                description=f"Local {category_name.lower()} professionals",
+            )
+            db.add(category)
+            db.flush()
+        elif not category.is_active:
+            category.is_active = True
+        category_ids = [category.id]
+    if not category_ids:
+        raise HTTPException(status_code=422, detail="A service category is required")
     provider = ServiceProvider(
         user_id=user.id,
         business_name=payload.business_name,
@@ -91,7 +118,7 @@ def create_provider(payload: ProviderCreate, user: User = Depends(require_roles(
     )
     db.add(provider)
     db.flush()
-    sync_provider_categories(db, provider, payload.category_ids)
+    sync_provider_categories(db, provider, category_ids)
     db.commit()
     db.refresh(provider)
     return to_provider_read(db, provider)
