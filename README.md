@@ -194,6 +194,7 @@ npm run build
 
 - `docker` is not recognized: install and start Docker Desktop, then reopen PowerShell.
 - The frontend cannot reach the API: confirm `http://localhost:8000/api/health` opens successfully and check `VITE_API_URL`.
+- Category options are empty or provider registration shows a database error: PostgreSQL may be using a different password for the `lspd` user than the value in `.env`. Sign in to PostgreSQL as an administrator and run `ALTER USER lspd WITH PASSWORD 'lspd';`, then confirm `.env` contains `DATABASE_URL=postgresql+psycopg://lspd:lspd@localhost:5432/lspd`. Run `alembic upgrade head` and `python ..\database\seed\seed.py` from `backend`, then refresh the registration page.
 - Docker backend exits while seeding: rebuild after pulling the latest files with `docker compose build --no-cache backend`.
 - If migrations fail with PostGIS errors, confirm the database user can run `CREATE EXTENSION postgis`.
 - If maps do not load, check browser network access to OpenStreetMap tile servers.
