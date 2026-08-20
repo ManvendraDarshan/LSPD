@@ -63,6 +63,7 @@ Open these URLs:
 
 - Application: <http://localhost:5173>
 - API health check: <http://localhost:8000/api/health>
+- Database health check: <http://localhost:8000/api/health/db>
 - Swagger API documentation: <http://localhost:8000/api/docs>
 
 To stop the services, press `Ctrl+C`, then run:
@@ -148,6 +149,7 @@ See `.env.example`.
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `GET /api/auth/me`
+- `GET /api/health/db`
 - `GET /api/providers`
 - `GET /api/providers/{id}`
 - `POST /api/providers`

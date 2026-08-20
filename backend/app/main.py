@@ -1,9 +1,13 @@
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from app.api import admin, auth, categories, documents, providers, reviews
 from app.core.config import get_settings
+from app.core.database import get_db
 
 
 settings = get_settings()
@@ -28,6 +32,18 @@ async def unhandled_exception(_: Request, exc: Exception):
 @app.get("/api/health")
 def health():
     return {"success": True, "message": "LSPD API is healthy"}
+
+
+@app.get("/api/health/db")
+def database_health(db: Session = Depends(get_db)):
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"success": False, "message": "Database is unavailable. Check DATABASE_URL and PostgreSQL credentials."},
+        )
+    return {"success": True, "message": "Database connection is healthy"}
 
 
 app.include_router(auth.router, prefix="/api")
